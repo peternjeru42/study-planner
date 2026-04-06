@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Edit Draft Session{% endblock %}
+{% block content %}
+<div class="page-header mb-4">
+    <h1>Edit draft session</h1>
+    <p>Adjust the timing before you approve this plan.</p>
+</div>
+<div class="card planner-card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <div class="mb-4">
+            <div class="small text-uppercase text-secondary">Session</div>
+            <div class="h5 mb-1">{{ session.session_title|default:session.assessment.title }}</div>
+            <div class="text-secondary">{{ session.subject.subject_name }}</div>
+        </div>
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="{% if field.name == 'notes' %}col-12{% else %}col-md-4{% endif %}">
+                {{ field.label_tag }}
+                {{ field }}
+                {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+            {% endfor %}
+            <div class="col-12">
+                <button class="btn btn-primary" type="submit">Save changes</button>
+                <a class="btn btn-link" href="{% url 'planner:weekly' %}">Back to draft</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

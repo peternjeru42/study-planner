@@ -26,15 +26,18 @@ class NotificationServiceTests(TestCase):
         )
         plan = StudyPlan.objects.create(
             user=self.user,
+            title="OS Draft",
             date_range_start=timezone.localdate(),
             date_range_end=timezone.localdate() + timedelta(days=6),
             trigger_reason="test",
+            status=StudyPlan.Status.ACTIVE,
         )
         start = timezone.localtime(timezone.now() + timedelta(minutes=10))
         StudySession.objects.create(
             study_plan=plan,
             subject=self.subject,
             assessment=self.assessment,
+            session_title="Kernel assignment focus",
             session_date=start.date(),
             start_time=start.time().replace(second=0, microsecond=0),
             end_time=(start + timedelta(minutes=60)).time().replace(second=0, microsecond=0),

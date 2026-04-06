@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from assessments.models import Assessment
 from notifications.models import Notification
+from planner.forms import PlanPromptForm
 from planner.models import StudyPlan, StudySession
 from progress.services import compute_metrics, refresh_progress_snapshot
 
@@ -12,10 +13,12 @@ from progress.services import compute_metrics, refresh_progress_snapshot
 @login_required
 def home_view(request):
     today = timezone.localdate()
-    active_plan = StudyPlan.objects.filter(user=request.user, is_active=True).prefetch_related("sessions").first()
-    today_sessions = StudySession.objects.filter(study_plan__user=request.user, session_date=today).select_related(
-        "subject", "assessment"
-    )
+    active_plan = StudyPlan.objects.filter(user=request.user, status=StudyPlan.Status.ACTIVE).prefetch_related("sessions").first()
+    today_sessions = StudySession.objects.filter(
+        study_plan__user=request.user,
+        study_plan__status=StudyPlan.Status.ACTIVE,
+        session_date=today,
+    ).select_related("subject", "assessment")
     upcoming_deadlines = Assessment.objects.filter(user=request.user).exclude(
         status__in=[Assessment.Status.SUBMITTED, Assessment.Status.COMPLETED]
     )[:6]
@@ -40,6 +43,7 @@ def home_view(request):
             "metrics": metrics,
             "subject_progress": subject_progress,
             "assessment_status_choices": Assessment.Status.choices,
+            "prompt_form": PlanPromptForm(request.user),
         },
     )
 

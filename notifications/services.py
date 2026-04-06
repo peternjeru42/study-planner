@@ -77,7 +77,7 @@ def run_notification_checks(now=None):
                 study_session=session,
                 assessment=session.assessment,
                 kind=Notification.Kind.STUDY_SESSION,
-                title=f"Study session soon: {session.assessment.title}",
+                title=f"Study session soon: {session.session_title or (session.assessment.title if session.assessment else 'Study session')}",
                 message=f"{session.subject.subject_name} starts at {session.start_time:%H:%M} for {session.duration_minutes} minutes.",
                 scheduled_for=reminder_time,
             )

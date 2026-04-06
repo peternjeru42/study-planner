@@ -10,7 +10,7 @@ class PlannerSettings(models.Model):
     default_session_minutes = models.PositiveIntegerField(default=60)
     overload_threshold_minutes = models.PositiveIntegerField(default=180)
     deadline_reminder_hours = models.PositiveIntegerField(default=24)
-    study_session_reminder_minutes = models.PositiveIntegerField(default=30)
+    study_session_reminder_minutes = models.PositiveIntegerField(default=60)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -26,12 +26,27 @@ class PlannerSettings(models.Model):
 
 
 class StudyPlan(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        ACTIVE = "active", "Active"
+        ARCHIVED = "archived", "Archived"
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="study_plans")
+    title = models.CharField(max_length=160, default="AI Study Plan")
+    prompt_text = models.TextField(blank=True)
+    weekly_hours_goal = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    focus_subject = models.ForeignKey(
+        "subjects.Subject",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="study_plans",
+    )
     generated_at = models.DateTimeField(auto_now_add=True)
     date_range_start = models.DateField()
     date_range_end = models.DateField()
     trigger_reason = models.CharField(max_length=60, default="manual")
-    is_active = models.BooleanField(default=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
     notes = models.TextField(blank=True)
 
     class Meta:
@@ -49,7 +64,14 @@ class StudySession(models.Model):
 
     study_plan = models.ForeignKey(StudyPlan, on_delete=models.CASCADE, related_name="sessions")
     subject = models.ForeignKey("subjects.Subject", on_delete=models.CASCADE, related_name="study_sessions")
-    assessment = models.ForeignKey("assessments.Assessment", on_delete=models.CASCADE, related_name="study_sessions")
+    assessment = models.ForeignKey(
+        "assessments.Assessment",
+        on_delete=models.CASCADE,
+        related_name="study_sessions",
+        blank=True,
+        null=True,
+    )
+    session_title = models.CharField(max_length=180, blank=True)
     session_date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -65,7 +87,7 @@ class StudySession(models.Model):
         ordering = ("session_date", "start_time", "order_index")
 
     def __str__(self):
-        return f"{self.assessment.title} on {self.session_date}"
+        return f"{self.session_title or (self.assessment.title if self.assessment else 'Study session')} on {self.session_date}"
 
 
 class PlannerLog(models.Model):

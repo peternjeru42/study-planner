@@ -1,45 +1,108 @@
 {% extends "base.html" %}
-{% block title %}Weekly Plan{% endblock %}
+{% block title %}Study Plans{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<section class="planner-hero mb-4">
     <div>
-        <h1 class="h3 mb-1">7-day study plan</h1>
-        {% if plan %}<p class="text-secondary mb-0">{{ plan.date_range_start }} to {{ plan.date_range_end }} · {{ plan.notes }}</p>{% endif %}
+        <span class="hero-kicker">Prompt-based planning</span>
+        <h1>Generate a polished study plan from one sentence.</h1>
+        <p>Type what unit you want to focus on and how many hours you want to study each week. Review the draft, edit any session, then approve it into your active plan list.</p>
     </div>
-    <button class="btn btn-primary" id="generate-plan-btn" data-url="{% url 'planner:generate' %}">Rebuild plan</button>
-</div>
+    <div class="planner-hero-actions">
+        <button class="btn btn-outline-light" id="generate-plan-btn" data-url="{% url 'planner:generate' %}">Rebuild assessment plan</button>
+        <a class="btn btn-light" href="{% url 'planner:calendar' %}">Open calendar</a>
+    </div>
+</section>
+
 <div class="row g-4">
-    {% for day, sessions in grouped_sessions.items %}
-    <div class="col-lg-6">
-        <div class="schedule-shell h-100">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h5 mb-0">{{ day|date:"l, d M" }}</h2>
-                <a class="small" href="{% url 'planner:daily-date' day|date:'Y-m-d' %}">Open day</a>
+    <div class="col-xl-5">
+        <div class="prompt-card">
+            <div class="prompt-card-head">
+                <h2>Create an AI study draft</h2>
+                <p>Example: Create a study plan for Database Systems where I will be studying at least 10 hours a week.</p>
             </div>
-            {% for session in sessions %}
-            <div class="border rounded-4 p-3 mb-3">
-                <div class="d-flex justify-content-between gap-3">
+            <form method="post" action="{% url 'planner:prompt' %}" class="vstack gap-3">
+                {% csrf_token %}
+                {{ prompt_form.prompt.label_tag }}
+                {{ prompt_form.prompt }}
+                {% for error in prompt_form.prompt.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                <button class="btn btn-primary btn-lg" type="submit">Generate draft plan</button>
+            </form>
+        </div>
+
+        {% if draft_plan %}
+        <div class="prompt-card draft-panel mt-4">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div>
+                    <div class="small text-uppercase text-secondary">Draft plan</div>
+                    <h2 class="h4 mb-1">{{ draft_plan.title }}</h2>
+                    <p class="text-secondary mb-0">{{ draft_plan.weekly_hours_goal }} hours/week{% if draft_plan.focus_subject %} | {{ draft_plan.focus_subject.subject_name }}{% endif %}</p>
+                </div>
+                <form method="post" action="{% url 'planner:approve' draft_plan.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-success" type="submit">Approve plan</button>
+                </form>
+            </div>
+            <p class="small text-secondary">{{ draft_plan.notes }}</p>
+            {% for day, sessions in grouped_draft_sessions.items %}
+            <div class="draft-day-block">
+                <div class="draft-day-title">{{ day|date:"D, d M" }}</div>
+                {% for session in sessions %}
+                <div class="draft-session-row">
                     <div>
-                        <div class="fw-semibold">{{ session.assessment.title }}</div>
-                        <div class="small text-secondary">{{ session.subject.subject_name }} · {{ session.start_time }} - {{ session.end_time }}</div>
-                        <div class="small text-secondary">Priority score: {{ session.priority_score }}</div>
+                        <div class="fw-semibold">{{ session.session_title|default:session.assessment.title }}</div>
+                        <div class="small text-secondary">{{ session.start_time }} - {{ session.end_time }} | {{ session.duration_minutes }} mins</div>
+                    </div>
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'planner:edit-session' session.pk %}">Edit</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-xl-7">
+        <div class="active-plan-card">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                <div>
+                    <div class="small text-uppercase text-secondary">Active plan</div>
+                    <h2 class="h3 mb-1">{% if plan %}{{ plan.title }}{% else %}No active plan yet{% endif %}</h2>
+                    <p class="text-secondary mb-0">
+                        {% if plan %}
+                        {{ plan.date_range_start }} to {{ plan.date_range_end }} | {{ plan.notes }}
+                        {% else %}
+                        Generate a draft from the AI composer, approve it, and it will appear here.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% for day, sessions in grouped_sessions.items %}
+            <div class="active-day-panel">
+                <div class="active-day-head">
+                    <h3>{{ day|date:"l" }}</h3>
+                    <span>{{ day|date:"d M" }}</span>
+                </div>
+                {% for session in sessions %}
+                <div class="active-session-row">
+                    <div>
+                        <div class="fw-semibold">{{ session.session_title|default:session.assessment.title }}</div>
+                        <div class="small text-secondary">{{ session.subject.subject_name }} | {{ session.start_time }} - {{ session.end_time }}</div>
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-sm btn-outline-success session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="completed">Done</button>
                         <button class="btn btn-sm btn-outline-danger session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="missed">Missed</button>
                     </div>
                 </div>
+                {% endfor %}
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <h3>Nothing active yet</h3>
+                <p>Create a draft with the AI composer, review it, and approve it to activate your weekly schedule.</p>
             </div>
             {% endfor %}
         </div>
     </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="schedule-shell">
-            <p class="mb-0 text-secondary">No active study plan yet. Add assessments or regenerate the plan.</p>
-        </div>
-    </div>
-    {% endfor %}
 </div>
 {% endblock %}
 {% block extra_js %}

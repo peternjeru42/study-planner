@@ -30,8 +30,8 @@ class PlannerSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(StudyPlan)
 class StudyPlanAdmin(admin.ModelAdmin):
-    list_display = ("user", "generated_at", "date_range_start", "date_range_end", "trigger_reason", "is_active")
-    list_filter = ("is_active", "trigger_reason")
+    list_display = ("title", "user", "generated_at", "date_range_start", "date_range_end", "trigger_reason", "status")
+    list_filter = ("status", "trigger_reason")
     search_fields = ("user__username",)
     actions = [regenerate_plans]
 

@@ -1,23 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Log In{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-5">
-        <div class="card shadow-sm border-0 planner-card">
-            <div class="card-body p-4">
-                <h1 class="h3 mb-3">Welcome back</h1>
-                <p class="text-secondary">Sign in to view your deadlines, study plan, and progress.</p>
-                <form method="post" class="vstack gap-3">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button class="btn btn-primary" type="submit">Log in</button>
-                </form>
-                <div class="mt-3 d-flex justify-content-between small">
-                    <a href="{% url 'password_reset' %}">Forgot your password?</a>
-                    <a href="{% url 'accounts:register' %}">Create account</a>
+<section class="auth-shell login-layout">
+    <div class="auth-showcase">
+        <div class="auth-badge">Focused Student Workflow</div>
+        <h1>Return to your active study plans, session reminders, and deadline view.</h1>
+        <p>Your dashboard is designed to turn course pressure into a clear weekly schedule, with drafts you can review before they go live.</p>
+    </div>
+    <div class="auth-panel">
+        <div class="auth-card">
+            <div class="auth-card-head">
+                <h2>Welcome back</h2>
+                <p>Sign in with your email address to continue.</p>
+            </div>
+            <form method="post" class="vstack gap-3">
+                {% csrf_token %}
+                {% for field in form %}
+                <div>
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                 </div>
+                {% endfor %}
+                {% for error in form.non_field_errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                <button class="btn btn-primary btn-lg mt-2" type="submit">Log in</button>
+            </form>
+            <div class="d-flex justify-content-between flex-wrap gap-2 mt-4 small">
+                <a href="{% url 'password_reset' %}">Forgot your password?</a>
+                <a href="{% url 'accounts:register' %}">Create account</a>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}

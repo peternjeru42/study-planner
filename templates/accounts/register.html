@@ -1,41 +1,66 @@
 {% extends "base.html" %}
 {% block title %}Create Account{% endblock %}
 {% block content %}
-<div class="row g-4">
-    <div class="col-lg-5">
-        <div class="hero-panel">
-            <span class="badge text-bg-warning mb-3">Student onboarding</span>
-            <h1 class="display-6 fw-semibold">Build a weekly plan from your real deadlines.</h1>
-            <p class="lead text-secondary">Add your subjects, define when you prefer to study, and let the planner generate sessions around urgency and workload.</p>
-        </div>
-    </div>
-    <div class="col-lg-7">
-        <div class="card planner-card shadow-sm border-0">
-            <div class="card-body p-4">
-                <form method="post" class="row g-3">
-                    {% csrf_token %}
-                    <div class="col-md-6">{{ user_form.username.label_tag }}{{ user_form.username }}</div>
-                    <div class="col-md-6">{{ user_form.email.label_tag }}{{ user_form.email }}</div>
-                    <div class="col-md-6">{{ user_form.first_name.label_tag }}{{ user_form.first_name }}</div>
-                    <div class="col-md-6">{{ user_form.last_name.label_tag }}{{ user_form.last_name }}</div>
-                    <div class="col-md-6">{{ user_form.password1.label_tag }}{{ user_form.password1 }}</div>
-                    <div class="col-md-6">{{ user_form.password2.label_tag }}{{ user_form.password2 }}</div>
-                    <div class="col-md-6">{{ profile_form.course.label_tag }}{{ profile_form.course }}</div>
-                    <div class="col-md-6">{{ profile_form.year_of_study.label_tag }}{{ profile_form.year_of_study }}</div>
-                    <div class="col-md-6">{{ profile_form.preferred_study_start_time.label_tag }}{{ profile_form.preferred_study_start_time }}</div>
-                    <div class="col-md-6">{{ profile_form.preferred_study_end_time.label_tag }}{{ profile_form.preferred_study_end_time }}</div>
-                    <div class="col-md-6">{{ profile_form.daily_study_goal_hours.label_tag }}{{ profile_form.daily_study_goal_hours }}</div>
-                    <div class="col-md-6">{{ profile_form.break_duration_minutes.label_tag }}{{ profile_form.break_duration_minutes }}</div>
-                    <div class="col-md-6">{{ profile_form.reminder_enabled.label_tag }}{{ profile_form.reminder_enabled }}</div>
-                    <div class="col-md-6">{{ profile_form.reminder_lead_minutes.label_tag }}{{ profile_form.reminder_lead_minutes }}</div>
-                    <div class="col-md-6">{{ profile_form.deadline_reminder_hours.label_tag }}{{ profile_form.deadline_reminder_hours }}</div>
-                    <div class="col-md-6">{{ profile_form.timezone.label_tag }}{{ profile_form.timezone }}</div>
-                    <div class="col-12">
-                        <button class="btn btn-primary" type="submit">Create account</button>
-                    </div>
-                </form>
+<section class="auth-shell">
+    <div class="auth-showcase">
+        <div class="auth-badge">AI Study Planning</div>
+        <h1>Create an account that feels ready for serious semester planning.</h1>
+        <p>Sign up in seconds, then generate prompt-based study plans, approve the best version, and keep every session visible from one dashboard.</p>
+        <div class="auth-feature-list">
+            <div>
+                <strong>Prompt-to-plan</strong>
+                <span>Generate a weekly plan from a simple sentence.</span>
+            </div>
+            <div>
+                <strong>Draft review</strong>
+                <span>Edit or approve sessions before they become active.</span>
+            </div>
+            <div>
+                <strong>Session reminders</strong>
+                <span>In-app reminders are scheduled one hour before each study block.</span>
             </div>
         </div>
     </div>
-</div>
+    <div class="auth-panel">
+        <div class="auth-card">
+            <div class="auth-card-head">
+                <h2>Open your planner</h2>
+                <p>Only the essentials are required. You can fine-tune study preferences after you log in.</p>
+            </div>
+            <form method="post" class="auth-form-grid">
+                {% csrf_token %}
+                <div>
+                    {{ user_form.first_name.label_tag }}
+                    {{ user_form.first_name }}
+                    {% for error in user_form.first_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div>
+                    {{ user_form.last_name.label_tag }}
+                    {{ user_form.last_name }}
+                    {% for error in user_form.last_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="full-span">
+                    {{ user_form.email.label_tag }}
+                    {{ user_form.email }}
+                    {% for error in user_form.email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div>
+                    {{ user_form.password1.label_tag }}
+                    {{ user_form.password1 }}
+                    {% for error in user_form.password1.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div>
+                    {{ user_form.password2.label_tag }}
+                    {{ user_form.password2 }}
+                    {% for error in user_form.password2.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                {% for error in user_form.non_field_errors %}<div class="full-span text-danger small">{{ error }}</div>{% endfor %}
+                <div class="full-span d-flex flex-column gap-3 pt-2">
+                    <button class="btn btn-primary btn-lg" type="submit">Create account</button>
+                    <div class="small text-secondary">Already have an account? <a href="{% url 'login' %}">Sign in</a></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
 {% endblock %}

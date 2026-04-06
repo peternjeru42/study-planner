@@ -1,58 +1,79 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+<section class="dashboard-hero mb-4">
     <div>
-        <h1 class="display-6 mb-1">Dashboard</h1>
-        <p class="text-secondary mb-0">Track today’s work, upcoming deadlines, and your weekly consistency.</p>
+        <span class="hero-kicker">Student command center</span>
+        <h1>{{ user.first_name|default:user.email }}, turn coursework into a clear weekly rhythm.</h1>
+        <p>Generate prompt-based study plans, keep an eye on upcoming deadlines, and track how consistently you are following through.</p>
     </div>
-    <button class="btn btn-primary" id="generate-plan-btn" data-url="{% url 'planner:generate' %}">Generate plan</button>
-</div>
+    <div class="hero-metrics">
+        <div><strong>{{ metrics.study_hours }}</strong><span>hours this week</span></div>
+        <div><strong>{{ metrics.completion_rate }}%</strong><span>completion rate</span></div>
+    </div>
+</section>
 
-<div class="row g-3 mb-4">
-    <div class="col-sm-6 col-xl-3"><div class="stat-card"><div class="text-secondary small">Completed tasks</div><div class="display-6">{{ metrics.completed_tasks }}</div></div></div>
-    <div class="col-sm-6 col-xl-3"><div class="stat-card"><div class="text-secondary small">Pending tasks</div><div class="display-6">{{ metrics.pending_tasks }}</div></div></div>
-    <div class="col-sm-6 col-xl-3"><div class="stat-card"><div class="text-secondary small">Study hours this week</div><div class="display-6">{{ metrics.study_hours }}</div></div></div>
-    <div class="col-sm-6 col-xl-3"><div class="stat-card"><div class="text-secondary small">Completion rate</div><div class="display-6">{{ metrics.completion_rate }}%</div></div></div>
+<div class="row g-4 mb-4">
+    <div class="col-xl-5">
+        <div class="prompt-card h-100">
+            <div class="prompt-card-head">
+                <h2>Ask for a study plan</h2>
+                <p>Type the unit and the study load you want. The system creates a draft you can review and approve.</p>
+            </div>
+            <form method="post" action="{% url 'planner:prompt' %}" class="vstack gap-3">
+                {% csrf_token %}
+                {{ prompt_form.prompt }}
+                <button class="btn btn-primary btn-lg" type="submit">Create AI draft</button>
+            </form>
+            <div class="small text-secondary mt-3">Reminder policy: study sessions alert you one hour earlier.</div>
+        </div>
+    </div>
+    <div class="col-xl-7">
+        <div class="row g-3">
+            <div class="col-sm-6 col-xl-3"><div class="stat-card accent-one"><div class="text-secondary small">Completed tasks</div><div class="display-6">{{ metrics.completed_tasks }}</div></div></div>
+            <div class="col-sm-6 col-xl-3"><div class="stat-card accent-two"><div class="text-secondary small">Pending tasks</div><div class="display-6">{{ metrics.pending_tasks }}</div></div></div>
+            <div class="col-sm-6 col-xl-3"><div class="stat-card accent-three"><div class="text-secondary small">Sessions done</div><div class="display-6">{{ metrics.study_sessions_completed }}</div></div></div>
+            <div class="col-sm-6 col-xl-3"><div class="stat-card accent-four"><div class="text-secondary small">On-time work</div><div class="display-6">{{ metrics.deadline_compliance_rate }}%</div></div></div>
+        </div>
+    </div>
 </div>
 
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card planner-card border-0 shadow-sm mb-4">
-            <div class="card-body">
+            <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="h5 mb-0">Today’s sessions</h2>
-                    <a href="{% url 'planner:daily' %}" class="small">Open daily plan</a>
+                    <h2 class="h5 mb-0">Today’s study sessions</h2>
+                    <a href="{% url 'planner:weekly' %}" class="small">View all plans</a>
                 </div>
                 {% if today_sessions %}
-                <div class="list-group list-group-flush">
-                    {% for session in today_sessions %}
-                    <div class="list-group-item px-0">
-                        <div class="d-flex justify-content-between align-items-start gap-3">
-                            <div>
-                                <div class="fw-semibold">{{ session.assessment.title }}</div>
-                                <div class="small text-secondary">{{ session.subject.subject_name }} · {{ session.start_time }} - {{ session.end_time }}</div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-outline-success session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="completed">Done</button>
-                                <button class="btn btn-sm btn-outline-danger session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="missed">Missed</button>
-                            </div>
-                        </div>
+                {% for session in today_sessions %}
+                <div class="active-session-row">
+                    <div>
+                        <div class="fw-semibold">{{ session.session_title|default:session.assessment.title }}</div>
+                        <div class="small text-secondary">{{ session.subject.subject_name }} | {{ session.start_time }} - {{ session.end_time }}</div>
                     </div>
-                    {% endfor %}
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-success session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="completed">Done</button>
+                        <button class="btn btn-sm btn-outline-danger session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="missed">Missed</button>
+                    </div>
                 </div>
+                {% endfor %}
                 {% else %}
-                <p class="text-secondary mb-0">No sessions scheduled for today yet.</p>
+                <div class="empty-state compact">
+                    <h3>No sessions planned for today</h3>
+                    <p>Create a new prompt-based plan or rebuild your assessment plan.</p>
+                </div>
                 {% endif %}
             </div>
         </div>
 
         <div class="card planner-card border-0 shadow-sm">
-            <div class="card-body">
+            <div class="card-body p-4">
                 <h2 class="h5 mb-3">Upcoming deadlines</h2>
                 <div class="table-responsive">
-                    <table class="table">
-                        <thead><tr><th>Task</th><th>Subject</th><th>Due</th><th>Status</th></tr></thead>
+                    <table class="table table-modern">
+                        <thead><tr><th>Task</th><th>Unit</th><th>Due</th><th>Status</th></tr></thead>
                         <tbody>
                             {% for assessment in upcoming_deadlines %}
                             <tr>
@@ -68,7 +89,7 @@
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="4" class="text-secondary">No active assessments yet.</td></tr>
+                            <tr><td colspan="4" class="text-secondary">No active deadlines yet.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -79,31 +100,31 @@
 
     <div class="col-lg-5">
         <div class="card planner-card border-0 shadow-sm mb-4">
-            <div class="card-body">
-                <h2 class="h5 mb-3">Subject progress</h2>
+            <div class="card-body p-4">
+                <h2 class="h5 mb-3">Progress by unit</h2>
                 {% for row in subject_progress %}
-                <div class="mb-3">
+                <div class="progress-list-item">
                     <div class="d-flex justify-content-between"><span>{{ row.subject.subject_name }}</span><span>{{ row.percentage }}%</span></div>
-                    <div class="progress" role="progressbar">
+                    <div class="progress modern-progress">
                         <div class="progress-bar" style="width: {{ row.percentage }}%; background: {{ row.subject.color_tag }}"></div>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-secondary mb-0">Add subjects and assessments to start tracking progress.</p>
+                <p class="text-secondary mb-0">Add units first, then generate a plan around them.</p>
                 {% endfor %}
             </div>
         </div>
 
         <div class="card planner-card border-0 shadow-sm">
-            <div class="card-body">
-                <h2 class="h5 mb-3">Recent alerts</h2>
+            <div class="card-body p-4">
+                <h2 class="h5 mb-3">Recent reminders</h2>
                 {% for notification in notifications %}
-                <div class="border-bottom pb-2 mb-2">
+                <div class="notification-row">
                     <div class="fw-semibold">{{ notification.title }}</div>
                     <div class="small text-secondary">{{ notification.message }}</div>
                 </div>
                 {% empty %}
-                <p class="text-secondary mb-0">No alerts yet.</p>
+                <p class="text-secondary mb-0">No reminders generated yet.</p>
                 {% endfor %}
             </div>
         </div>
@@ -112,11 +133,6 @@
 {% endblock %}
 {% block extra_js %}
 <script>
-document.getElementById("generate-plan-btn")?.addEventListener("click", async (event) => {
-    const url = event.currentTarget.dataset.url;
-    await window.studyPlanner.generatePlan(url);
-    window.location.href = "{% url 'planner:weekly' %}";
-});
 document.querySelectorAll(".session-status").forEach((button) => {
     button.addEventListener("click", async () => {
         await window.studyPlanner.updateStatus(button.dataset.url, button.dataset.status);

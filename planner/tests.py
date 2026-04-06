@@ -7,8 +7,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from assessments.models import Assessment
-from planner.models import PlannerSettings
-from planner.services import generate_plan, score_assessment
+from planner.models import PlannerSettings, StudyPlan
+from planner.services import generate_plan, generate_prompt_plan, score_assessment
 from subjects.models import Subject
 
 
@@ -58,6 +58,18 @@ class PlannerServiceTests(TestCase):
         self.assertIn("Unscheduled work", plan.notes)
         daily_minutes = sum(session.duration_minutes for session in plan.sessions.all() if session.session_date == timezone.localdate())
         self.assertLessEqual(daily_minutes, 60)
+
+    def test_prompt_plan_creates_draft_with_requested_hours(self):
+        profile = self.user.profile
+        profile.preferred_study_end_time = time(hour=21)
+        profile.save()
+        plan = generate_prompt_plan(
+            self.user,
+            "Create a study plan for Networks where I will be studying at least 10 hours a week.",
+        )
+        self.assertEqual(plan.status, StudyPlan.Status.DRAFT)
+        total_minutes = sum(session.duration_minutes for session in plan.sessions.all())
+        self.assertGreaterEqual(total_minutes, 600)
 
 
 class PlannerAdminTests(TestCase):

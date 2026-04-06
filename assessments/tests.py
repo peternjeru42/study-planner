@@ -32,4 +32,4 @@ class AssessmentCrudTests(TestCase):
         )
         self.assertRedirects(response, reverse("assessments:list"))
         self.assertTrue(Assessment.objects.filter(user=self.user, title="Normalization assignment").exists())
-        self.assertTrue(StudyPlan.objects.filter(user=self.user, is_active=True).exists())
+        self.assertTrue(StudyPlan.objects.filter(user=self.user, status=StudyPlan.Status.ACTIVE).exists())

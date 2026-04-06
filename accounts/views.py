@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from accounts.forms import RegistrationForm, StudentProfileForm, UserUpdateForm
-from planner.services import generate_plan
 
 
 def register_view(request):
@@ -12,19 +11,13 @@ def register_view(request):
         return redirect("dashboard:home")
 
     user_form = RegistrationForm(request.POST or None)
-    profile_form = StudentProfileForm(request.POST or None)
-    if request.method == "POST" and user_form.is_valid() and profile_form.is_valid():
+    if request.method == "POST" and user_form.is_valid():
         user = user_form.save()
-        profile = user.profile
-        for field, value in profile_form.cleaned_data.items():
-            setattr(profile, field, value)
-        profile.save()
         login(request, user)
-        generate_plan(user, trigger_reason="registration")
-        messages.success(request, "Your account is ready. Start by adding subjects and assessments.")
+        messages.success(request, "Your account is ready. Create your first study plan from the dashboard.")
         return redirect("dashboard:home")
 
-    return render(request, "accounts/register.html", {"user_form": user_form, "profile_form": profile_form})
+    return render(request, "accounts/register.html", {"user_form": user_form})
 
 
 @login_required
