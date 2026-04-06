@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 mb-1">Progress analytics</h1>
+    <p class="text-secondary mb-0">Workload mix, consistency, and deadline performance.</p>
+</div>
+<div class="row g-4">
+    <div class="col-lg-6"><div class="schedule-shell"><canvas id="workload-chart"></canvas></div></div>
+    <div class="col-lg-6"><div class="schedule-shell"><canvas id="consistency-chart"></canvas></div></div>
+    <div class="col-lg-12">
+        <div class="card planner-card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3"><div class="stat-card"><div class="text-secondary small">Completion rate</div><div class="display-6">{{ metrics.completion_rate }}%</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div class="text-secondary small">Deadline compliance</div><div class="display-6">{{ metrics.deadline_compliance_rate }}%</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div class="text-secondary small">Sessions completed</div><div class="display-6">{{ metrics.study_sessions_completed }}</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div class="text-secondary small">On-time submissions</div><div class="display-6">{{ metrics.tasks_completed_on_time }}</div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+{{ metrics.subject_workload|json_script:"subject-workload-data" }}
+{{ metrics.study_consistency|json_script:"study-consistency-data" }}
+<script>
+const workload = JSON.parse(document.getElementById("subject-workload-data").textContent);
+const consistency = JSON.parse(document.getElementById("study-consistency-data").textContent);
+new Chart(document.getElementById("workload-chart"), {
+    type: "bar",
+    data: {
+        labels: workload.map((item) => item.subject__subject_name),
+        datasets: [{ label: "Estimated hours", data: workload.map((item) => item.total_hours), backgroundColor: "#1F7A8C" }],
+    },
+});
+new Chart(document.getElementById("consistency-chart"), {
+    type: "line",
+    data: {
+        labels: consistency.map((item) => item.day),
+        datasets: [{ label: "Completed study hours", data: consistency.map((item) => item.hours), borderColor: "#BF4342", tension: 0.3 }],
+    },
+});
+</script>
+{% endblock %}

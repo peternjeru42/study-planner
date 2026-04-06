@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="display-6 mb-1">Dashboard</h1>
+        <p class="text-secondary mb-0">Track today’s work, upcoming deadlines, and your weekly consistency.</p>
+    </div>
+    <button class="btn btn-primary" id="generate-plan-btn" data-url="{% url 'planner:generate' %}">Generate plan</button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3"><div class="stat-card"><div class="text-secondary small">Completed tasks</div><div class="display-6">{{ metrics.completed_tasks }}</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="stat-card"><div class="text-secondary small">Pending tasks</div><div class="display-6">{{ metrics.pending_tasks }}</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="stat-card"><div class="text-secondary small">Study hours this week</div><div class="display-6">{{ metrics.study_hours }}</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="stat-card"><div class="text-secondary small">Completion rate</div><div class="display-6">{{ metrics.completion_rate }}%</div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card planner-card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 mb-0">Today’s sessions</h2>
+                    <a href="{% url 'planner:daily' %}" class="small">Open daily plan</a>
+                </div>
+                {% if today_sessions %}
+                <div class="list-group list-group-flush">
+                    {% for session in today_sessions %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <div class="fw-semibold">{{ session.assessment.title }}</div>
+                                <div class="small text-secondary">{{ session.subject.subject_name }} · {{ session.start_time }} - {{ session.end_time }}</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-success session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="completed">Done</button>
+                                <button class="btn btn-sm btn-outline-danger session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="missed">Missed</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-secondary mb-0">No sessions scheduled for today yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card planner-card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Upcoming deadlines</h2>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Task</th><th>Subject</th><th>Due</th><th>Status</th></tr></thead>
+                        <tbody>
+                            {% for assessment in upcoming_deadlines %}
+                            <tr>
+                                <td>{{ assessment.title }}</td>
+                                <td>{{ assessment.subject.subject_name }}</td>
+                                <td>{{ assessment.due_at|date:"d M Y H:i" }}</td>
+                                <td>
+                                    <select class="form-select form-select-sm assessment-status" data-url="{% url 'progress:assessment-status' assessment.pk %}">
+                                        {% for value, label in assessment_status_choices %}
+                                        <option value="{{ value }}" {% if assessment.status == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-secondary">No active assessments yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card planner-card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Subject progress</h2>
+                {% for row in subject_progress %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between"><span>{{ row.subject.subject_name }}</span><span>{{ row.percentage }}%</span></div>
+                    <div class="progress" role="progressbar">
+                        <div class="progress-bar" style="width: {{ row.percentage }}%; background: {{ row.subject.color_tag }}"></div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-secondary mb-0">Add subjects and assessments to start tracking progress.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card planner-card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Recent alerts</h2>
+                {% for notification in notifications %}
+                <div class="border-bottom pb-2 mb-2">
+                    <div class="fw-semibold">{{ notification.title }}</div>
+                    <div class="small text-secondary">{{ notification.message }}</div>
+                </div>
+                {% empty %}
+                <p class="text-secondary mb-0">No alerts yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById("generate-plan-btn")?.addEventListener("click", async (event) => {
+    const url = event.currentTarget.dataset.url;
+    await window.studyPlanner.generatePlan(url);
+    window.location.href = "{% url 'planner:weekly' %}";
+});
+document.querySelectorAll(".session-status").forEach((button) => {
+    button.addEventListener("click", async () => {
+        await window.studyPlanner.updateStatus(button.dataset.url, button.dataset.status);
+        window.location.reload();
+    });
+});
+document.querySelectorAll(".assessment-status").forEach((select) => {
+    select.addEventListener("change", async () => {
+        await window.studyPlanner.updateStatus(select.dataset.url, select.value);
+        window.location.reload();
+    });
+});
+</script>
+{% endblock %}

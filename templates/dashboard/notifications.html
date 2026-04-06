@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">In-app reminders</h1>
+        <p class="text-secondary mb-0">Reminder simulation records appear here instead of email or SMS delivery.</p>
+    </div>
+</div>
+<div class="card planner-card border-0 shadow-sm">
+    <div class="card-body">
+        {% for notification in notifications %}
+        <div class="border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between gap-3">
+                <div>
+                    <div class="fw-semibold">{{ notification.title }}</div>
+                    <div class="text-secondary small">{{ notification.message }}</div>
+                    <div class="small mt-1">{{ notification.scheduled_for|date:"d M Y H:i" }}</div>
+                </div>
+                <div>
+                    {% if not notification.is_read %}
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'dashboard:notification-read' notification.pk %}">Mark read</a>
+                    {% else %}
+                    <span class="badge text-bg-light">Read</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-secondary mb-0">No notifications have been generated yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

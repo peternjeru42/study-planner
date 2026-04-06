@@ -1,0 +1,58 @@
+:root {
+    --planner-navy: #143642;
+    --planner-sand: #f6f5f0;
+    --planner-gold: #f3c969;
+    --planner-mint: #d7efe9;
+    --planner-ink: #1d2a30;
+}
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(243, 201, 105, 0.22), transparent 20rem),
+        linear-gradient(180deg, #f6f5f0 0%, #eef3f4 100%);
+    color: var(--planner-ink);
+    min-height: 100vh;
+}
+
+.planner-nav {
+    background: rgba(20, 54, 66, 0.96);
+    backdrop-filter: blur(10px);
+}
+
+.planner-card {
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.hero-panel {
+    padding: 2rem;
+    border-radius: 1.5rem;
+    background: linear-gradient(145deg, rgba(20, 54, 66, 0.97), rgba(35, 90, 104, 0.92));
+    color: white;
+    min-height: 100%;
+}
+
+.stat-card {
+    padding: 1.25rem;
+    border-radius: 1rem;
+    background: white;
+    box-shadow: 0 12px 25px rgba(20, 54, 66, 0.08);
+}
+
+.calendar-shell,
+.schedule-shell {
+    background: white;
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0 12px 25px rgba(20, 54, 66, 0.08);
+}
+
+.table > :not(caption) > * > * {
+    vertical-align: middle;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+}

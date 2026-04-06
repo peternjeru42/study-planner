@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Create Account{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="hero-panel">
+            <span class="badge text-bg-warning mb-3">Student onboarding</span>
+            <h1 class="display-6 fw-semibold">Build a weekly plan from your real deadlines.</h1>
+            <p class="lead text-secondary">Add your subjects, define when you prefer to study, and let the planner generate sessions around urgency and workload.</p>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card planner-card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form method="post" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-md-6">{{ user_form.username.label_tag }}{{ user_form.username }}</div>
+                    <div class="col-md-6">{{ user_form.email.label_tag }}{{ user_form.email }}</div>
+                    <div class="col-md-6">{{ user_form.first_name.label_tag }}{{ user_form.first_name }}</div>
+                    <div class="col-md-6">{{ user_form.last_name.label_tag }}{{ user_form.last_name }}</div>
+                    <div class="col-md-6">{{ user_form.password1.label_tag }}{{ user_form.password1 }}</div>
+                    <div class="col-md-6">{{ user_form.password2.label_tag }}{{ user_form.password2 }}</div>
+                    <div class="col-md-6">{{ profile_form.course.label_tag }}{{ profile_form.course }}</div>
+                    <div class="col-md-6">{{ profile_form.year_of_study.label_tag }}{{ profile_form.year_of_study }}</div>
+                    <div class="col-md-6">{{ profile_form.preferred_study_start_time.label_tag }}{{ profile_form.preferred_study_start_time }}</div>
+                    <div class="col-md-6">{{ profile_form.preferred_study_end_time.label_tag }}{{ profile_form.preferred_study_end_time }}</div>
+                    <div class="col-md-6">{{ profile_form.daily_study_goal_hours.label_tag }}{{ profile_form.daily_study_goal_hours }}</div>
+                    <div class="col-md-6">{{ profile_form.break_duration_minutes.label_tag }}{{ profile_form.break_duration_minutes }}</div>
+                    <div class="col-md-6">{{ profile_form.reminder_enabled.label_tag }}{{ profile_form.reminder_enabled }}</div>
+                    <div class="col-md-6">{{ profile_form.reminder_lead_minutes.label_tag }}{{ profile_form.reminder_lead_minutes }}</div>
+                    <div class="col-md-6">{{ profile_form.deadline_reminder_hours.label_tag }}{{ profile_form.deadline_reminder_hours }}</div>
+                    <div class="col-md-6">{{ profile_form.timezone.label_tag }}{{ profile_form.timezone }}</div>
+                    <div class="col-12">
+                        <button class="btn btn-primary" type="submit">Create account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Daily Plan{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Daily plan</h1>
+        <p class="text-secondary mb-0">{{ plan_date|date:"l, d M Y" }}</p>
+    </div>
+    <a class="btn btn-outline-primary" href="{% url 'planner:weekly' %}">Back to week</a>
+</div>
+<div class="schedule-shell">
+    {% for session in sessions %}
+    <div class="d-flex justify-content-between align-items-start border-bottom py-3">
+        <div>
+            <div class="fw-semibold">{{ session.assessment.title }}</div>
+            <div class="small text-secondary">{{ session.subject.subject_name }} · {{ session.start_time }} - {{ session.end_time }}</div>
+        </div>
+        <span class="badge text-bg-light">{{ session.get_status_display }}</span>
+    </div>
+    {% empty %}
+    <p class="mb-0 text-secondary">Nothing scheduled for this day.</p>
+    {% endfor %}
+</div>
+{% endblock %}

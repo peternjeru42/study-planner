@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Planner Settings{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card planner-card border-0 shadow-sm">
+            <div class="card-body">
+                <h1 class="h4">Account settings</h1>
+                <p class="text-secondary mb-0">Update your personal details and study preferences. Saving here regenerates the study plan.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card planner-card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-md-4">{{ user_form.first_name.label_tag }}{{ user_form.first_name }}</div>
+                    <div class="col-md-4">{{ user_form.last_name.label_tag }}{{ user_form.last_name }}</div>
+                    <div class="col-md-4">{{ user_form.email.label_tag }}{{ user_form.email }}</div>
+                    <div class="col-md-6">{{ profile_form.course.label_tag }}{{ profile_form.course }}</div>
+                    <div class="col-md-6">{{ profile_form.year_of_study.label_tag }}{{ profile_form.year_of_study }}</div>
+                    <div class="col-md-6">{{ profile_form.preferred_study_start_time.label_tag }}{{ profile_form.preferred_study_start_time }}</div>
+                    <div class="col-md-6">{{ profile_form.preferred_study_end_time.label_tag }}{{ profile_form.preferred_study_end_time }}</div>
+                    <div class="col-md-4">{{ profile_form.daily_study_goal_hours.label_tag }}{{ profile_form.daily_study_goal_hours }}</div>
+                    <div class="col-md-4">{{ profile_form.break_duration_minutes.label_tag }}{{ profile_form.break_duration_minutes }}</div>
+                    <div class="col-md-4">{{ profile_form.reminder_lead_minutes.label_tag }}{{ profile_form.reminder_lead_minutes }}</div>
+                    <div class="col-md-4">{{ profile_form.deadline_reminder_hours.label_tag }}{{ profile_form.deadline_reminder_hours }}</div>
+                    <div class="col-md-4">{{ profile_form.timezone.label_tag }}{{ profile_form.timezone }}</div>
+                    <div class="col-md-4 d-flex align-items-end">{{ profile_form.reminder_enabled }}</div>
+                    <div class="col-12"><button class="btn btn-primary" type="submit">Save settings</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

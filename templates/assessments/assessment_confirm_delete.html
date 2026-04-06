@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card planner-card border-0 shadow-sm">
+    <div class="card-body">
+        <h1 class="h4">Delete assessment</h1>
+        <p>Remove <strong>{{ object.title }}</strong> from your planner?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">Delete</button>
+            <a class="btn btn-link" href="{% url 'assessments:list' %}">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

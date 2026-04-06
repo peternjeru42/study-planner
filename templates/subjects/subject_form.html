@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Subject Form{% endblock %}
+{% block content %}
+<div class="card planner-card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <h1 class="h4 mb-3">{{ view.object|default_if_none:"New" }} Subject</h1>
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="col-md-6">
+                {{ field.label_tag }}
+                {{ field }}
+                {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+            {% endfor %}
+            <div class="col-12">
+                <button class="btn btn-primary" type="submit">Save</button>
+                <a class="btn btn-link" href="{% url 'subjects:list' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

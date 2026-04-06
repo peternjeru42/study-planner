@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Weekly Plan{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">7-day study plan</h1>
+        {% if plan %}<p class="text-secondary mb-0">{{ plan.date_range_start }} to {{ plan.date_range_end }} · {{ plan.notes }}</p>{% endif %}
+    </div>
+    <button class="btn btn-primary" id="generate-plan-btn" data-url="{% url 'planner:generate' %}">Rebuild plan</button>
+</div>
+<div class="row g-4">
+    {% for day, sessions in grouped_sessions.items %}
+    <div class="col-lg-6">
+        <div class="schedule-shell h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0">{{ day|date:"l, d M" }}</h2>
+                <a class="small" href="{% url 'planner:daily-date' day|date:'Y-m-d' %}">Open day</a>
+            </div>
+            {% for session in sessions %}
+            <div class="border rounded-4 p-3 mb-3">
+                <div class="d-flex justify-content-between gap-3">
+                    <div>
+                        <div class="fw-semibold">{{ session.assessment.title }}</div>
+                        <div class="small text-secondary">{{ session.subject.subject_name }} · {{ session.start_time }} - {{ session.end_time }}</div>
+                        <div class="small text-secondary">Priority score: {{ session.priority_score }}</div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-success session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="completed">Done</button>
+                        <button class="btn btn-sm btn-outline-danger session-status" data-url="{% url 'progress:session-status' session.pk %}" data-status="missed">Missed</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="schedule-shell">
+            <p class="mb-0 text-secondary">No active study plan yet. Add assessments or regenerate the plan.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById("generate-plan-btn")?.addEventListener("click", async (event) => {
+    await window.studyPlanner.generatePlan(event.currentTarget.dataset.url);
+    window.location.reload();
+});
+document.querySelectorAll(".session-status").forEach((button) => {
+    button.addEventListener("click", async () => {
+        await window.studyPlanner.updateStatus(button.dataset.url, button.dataset.status);
+        window.location.reload();
+    });
+});
+</script>
+{% endblock %}
